@@ -90,7 +90,7 @@ module Dul
       end
     end
 
-    def self.throttle_by_ip(name, options, &block)
+    def self.throttle(name, options, &block)
       throttle = Rack::Attack.throttle(name, options, &block)
 
       Rack::Attack.throttled_response_retry_after_header = true

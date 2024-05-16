@@ -32,7 +32,7 @@ module Dul
 
     # Is rack-attack enabled?
     def self.enabled?
-      Rack::Attack.enabled = bool
+      Rack::Attack.enabled
     end
 
     # Clears rack-attack configuration and returns to defaults

@@ -16,13 +16,12 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-In a Rails initialize (e.g., config/initializers/dul-defender.rb):
+In a Rails initializer (e.g., config/initializers/dul-defender.rb):
 
 ```ruby
 Dul::Defender.configure do |config|
-  config.log_events
-  config.throttle_by_ip(limit: 5, period: 1, pattern: '/catalog')
-  config.safelist_okd_cluster
+  config.log_level = :info
+  config.throttle_by_ip limit: 5, period: 1, pattern: '/catalog'
 end
 ```
 

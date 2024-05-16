@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "defender/version"
+require 'rack/attack'
 require 'logger'
 
 module Dul
@@ -13,6 +14,10 @@ module Dul
       Rack::Attack.enabled = false
     end
 
+    def self.enable!
+      Rack::Attack.enabled = true
+    end
+
     def self.enabled?
       Rack::Attack.enabled
     end
@@ -23,7 +28,7 @@ module Dul
       init
     end
 
-    def self.log_events(log_level: :warn)
+    def self.log_events(log_level: Logger::WARN)
       require 'active_support/notifications'
 
       ActiveSupport::Notifications.subscribe(/rack_attack/) do |_name, _start, _finish, _instrumenter_id, payload|
@@ -43,15 +48,15 @@ module Dul
       disable! if defined?(Rails) && Rails.env.test? # disable in Rails test environment
 
       if enabled?
-        logger.info "#{PROGNAME} is enabled."
+        logger.info(PROGNAME) { "#{self} is enabled." }
       else
-        logger.warn "#{PROGNAME} is disabled."
+        logger.warn(PROGNAME) { "#{self} is disabled." }
       end
 
       @inited = true
     end
 
-    def self.throttle_by_ip(pattern: nil, limit:, period:, retry_after_header: true)
+    def self.throttle_by_ip(limit:, period:, pattern: nil, retry_after_header: true)
       pattern = Regexp.new(/\A#{pattern}\z/) if pattern.is_a?(String)
 
       throttle = Rack::Attack.throttle('requests by ip', limit:, period:) do |request|
@@ -60,7 +65,7 @@ module Dul
 
       Rack::Attack.throttled_response_retry_after_header = retry_after_header
 
-      logger.info "[RACK ATTACK] Throttle #{throttle.name}: max #{throttle.limit} requests every #{throttle.period} second(s) (pattern: #{pattern.inspect})"
+      logger.info(PROGNAME) { "Throttle #{throttle.name}: max #{throttle.limit} requests every #{throttle.period} second(s) (pattern: #{pattern.inspect})" }
     end
 
     def self.safelist_okd_cluster
@@ -68,7 +73,7 @@ module Dul
     end
 
     def self.logger
-      @logger ||= defined?(Rails) ? Rails.logger : Logger.new(STDOUT, progname: PROGNAME)
+      @logger ||= defined?(Rails) ? Rails.logger : Logger.new(STDOUT)
     end
   end
 end

@@ -90,18 +90,12 @@ module Dul
       end
     end
 
-    def self.throttle_by_ip(limit:, period:, pattern: nil)
-      pattern = Regexp.new(/\A#{pattern}\z/) if pattern.is_a?(String)
-
-      limit, period = limit.to_i, period.to_i
-
-      throttle = Rack::Attack.throttle('requests by ip', limit:, period:) do |request|
-        request.ip if pattern.nil? || pattern.match?(request.path)
-      end
+    def self.throttle_by_ip(name, options, &block)
+      throttle = Rack::Attack.throttle(name, options, &block)
 
       Rack::Attack.throttled_response_retry_after_header = true
 
-      logger.info(PROGNAME) { "Throttling #{throttle.name}: max #{throttle.limit} requests every #{throttle.period} second(s) (pattern: #{pattern.inspect})" }
+      logger.info(PROGNAME) { "Throttling #{throttle.name}: max #{throttle.limit} requests every #{throttle.period} second(s)." }
     end
 
     def self.safelist_okd_cluster

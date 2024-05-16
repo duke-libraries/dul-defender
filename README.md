@@ -21,7 +21,9 @@ In a Rails initializer (e.g., config/initializers/dul-defender.rb):
 ```ruby
 Dul::Defender.configure do |config|
   config.log_level = :info
-  config.throttle_by_ip limit: 5, period: 1, pattern: '/catalog'
+  config.throttle_by_ip limit: 5, period: 1 do |request|
+    request.ip if request.path == '/catalog'
+  end
 end
 ```
 
